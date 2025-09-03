@@ -1,73 +1,31 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      v-model="drawer"
-      :rail="rail"
-      permanent
-      @click="rail = false"
-      class="bg-primary"
-    >
+    <v-navigation-drawer v-model="drawer" :rail="rail" permanent @click="rail = false" class="bg-primary">
       <v-list density="compact" nav>
-        <v-list-item
-          prepend-icon="mdi-view-dashboard"
-          title="Dashboard"
-          value="dashboard"
-          to="/dashboard"
-        ></v-list-item>
-        
+        <v-list-item prepend-icon="mdi-view-dashboard" title="Dashboard" value="dashboard"
+          to="/dashboard"></v-list-item>
+
         <v-list-group value="Products">
           <template v-slot:activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-package-variant"
-              title="Products"
-            ></v-list-item>
+            <v-list-item v-bind="props" prepend-icon="mdi-package-variant" title="Products"></v-list-item>
           </template>
-          <v-list-item
-            v-for="(item, i) in productItems"
-            :key="i"
-            :value="item.title"
-            :title="item.title"
-            :to="item.to"
-            :prepend-icon="item.icon"
-          ></v-list-item>
+          <v-list-item v-for="(item, i) in productItems" :key="i" :value="item.title" :title="item.title" :to="item.to"
+            :prepend-icon="item.icon"></v-list-item>
         </v-list-group>
 
         <v-list-group value="Categories">
           <template v-slot:activator="{ props }">
-            <v-list-item
-              v-bind="props"
-              prepend-icon="mdi-shape"
-              title="Categories"
-            ></v-list-item>
+            <v-list-item v-bind="props" prepend-icon="mdi-shape" title="Categories"></v-list-item>
           </template>
-          <v-list-item
-            v-for="(item, i) in categoryItems"
-            :key="i"
-            :value="item.title"
-            :title="item.title"
-            :to="item.to"
-            :prepend-icon="item.icon"
-          ></v-list-item>
+          <v-list-item v-for="(item, i) in categoryItems" :key="i" :value="item.title" :title="item.title" :to="item.to"
+            :prepend-icon="item.icon"></v-list-item>
         </v-list-group>
 
-        <v-list-item
-          prepend-icon="mdi-information"
-          title="About Us"
-          to="/about"
-        ></v-list-item>
+        <v-list-item prepend-icon="mdi-information" title="About Us" to="/about"></v-list-item>
 
-        <v-list-item
-          prepend-icon="mdi-email"
-          title="Contact Us"
-          to="/contact"
-        ></v-list-item>
+        <v-list-item prepend-icon="mdi-email" title="Contact Us" to="/contact"></v-list-item>
 
-        <v-list-item
-          prepend-icon="mdi-cog"
-          title="Settings"
-          to="/settings"
-        ></v-list-item>
+        <v-list-item prepend-icon="mdi-cog" title="Settings" to="/settings"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -87,21 +45,13 @@
       </v-btn>
       <v-menu>
         <template v-slot:activator="{ props }">
-          <v-btn
-            color="primary"
-            v-bind="props"
-          >
+          <v-btn color="primary" v-bind="props">
             <v-icon start>mdi-account-circle</v-icon>
             Admin
           </v-btn>
         </template>
         <v-list>
-          <v-list-item
-            v-for="(item, index) in userMenu"
-            :key="index"
-            :value="index"
-            :to="item.to"
-          >
+          <v-list-item v-for="(item, index) in userMenu" :key="index" :value="index" :to="item.to">
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item>
           <v-divider></v-divider>

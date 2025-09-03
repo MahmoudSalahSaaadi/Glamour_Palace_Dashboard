@@ -9,44 +9,30 @@
 
     <v-card>
       <v-card-title class="d-flex align-center">
-        <v-text-field
-          v-model="search"
-          append-inner-icon="mdi-magnify"
-          label="Search products"
-          single-line
-          hide-details
-          variant="outlined"
-          density="compact"
-          class="mr-4"
-        ></v-text-field>
-        <v-select
-          v-model="categoryFilter"
-          :items="categories"
-          item-title="name"
-          item-value="id"
-          label="Category"
-          clearable
-          density="compact"
-          variant="outlined"
-          style="max-width: 200px;"
-        ></v-select>
+        <v-text-field v-model="search" append-inner-icon="mdi-magnify" label="Search products" single-line hide-details
+          variant="outlined" density="compact" class="mr-4"></v-text-field>
       </v-card-title>
 
-      <v-data-table
-        :headers="headers"
-        :items="products"
-        :search="search"
-        :items-per-page="10"
-        class="elevation-1"
-      >
-        <template v-slot:item.image="{ item }">
-          <v-avatar size="40" rounded="0">
-            <v-img :src="item.image || 'https://via.placeholder.com/40'" :alt="item.name"></v-img>
-          </v-avatar>
+      <v-data-table :headers="headers" :items="products" :search="search" :items-per-page="10" class="elevation-1"
+        :loading="loading">
+        <template v-slot:item.id="{ item }">
+          <v-chip color="primary" variant="outlined" size="small">
+            #{{ item.id }}
+          </v-chip>
+        </template>
+
+        <template v-slot:item.name="{ item }">
+          <div class="product-name">{{ item.name }}</div>
+        </template>
+
+        <template v-slot:item.description="{ item }">
+          <div class="product-description">
+            {{ truncateDescription(item.description) }}
+          </div>
         </template>
 
         <template v-slot:item.price="{ item }">
-          ${{ item.price.toFixed(2) }}
+          ${{ parseFloat(item.price).toFixed(2) }}
         </template>
 
         <template v-slot:item.stock="{ item }">
@@ -55,31 +41,33 @@
           </v-chip>
         </template>
 
-        <template v-slot:item.status="{ item }">
-          <v-chip :color="item.status === 'published' ? 'success' : 'grey'" size="small">
-            {{ item.status }}
-          </v-chip>
-        </template>
-
         <template v-slot:item.actions="{ item }">
-          <v-btn
-            icon
-            size="small"
-            variant="text"
-            color="primary"
-            :to="`/products/edit/${item.id}`"
-          >
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-          <v-btn
-            icon
-            size="small"
-            variant="text"
-            color="error"
-            @click="deleteProduct(item)"
-          >
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          <div class="action-buttons">
+            <v-tooltip text="Edit Product">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon size="small" variant="text" color="primary"
+                  :to="`/products/edit/${item.id}`">
+                  <v-icon>mdi-pencil</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+
+            <v-tooltip text="View Details">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon size="small" variant="text" color="info" :to="`/products/view/${item.id}`">
+                  <v-icon>mdi-eye</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+
+            <v-tooltip text="Delete Product">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon size="small" variant="text" color="error" @click="deleteProduct(item)">
+                  <v-icon>mdi-delete</v-icon>
+                </v-btn>
+              </template>
+            </v-tooltip>
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -101,61 +89,48 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 
-// Sample data - replace with API calls in a real application
-const products = ref([
-  {
-    id: 1,
-    name: 'Summer Dress',
-    sku: 'SUMMER-001',
-    category: 'Dresses',
-    price: 49.99,
-    stock: 45,
-    status: 'published',
-    image: 'https://via.placeholder.com/40',
-  },
-  {
-    id: 2,
-    name: 'Denim Jacket',
-    sku: 'JACKET-001',
-    category: 'Jackets',
-    price: 89.99,
-    stock: 12,
-    status: 'published',
-    image: 'https://via.placeholder.com/40',
-  },
-  // Add more sample products as needed
-]);
-
-const categories = ref([
-  { id: 1, name: 'Dresses' },
-  { id: 2, name: 'Jackets' },
-  { id: 3, name: 'Tops' },
-  { id: 4, name: 'Bottoms' },
-]);
-
+const products = ref([]);
 const search = ref('');
-const categoryFilter = ref('');
 const deleteDialog = ref(false);
 const selectedProduct = ref(null);
+const loading = ref(true);
 
 const headers = [
-  { title: 'Image', key: 'image', sortable: false, width: '80px' },
+  { title: 'ID', key: 'id', sortable: true, width: '100px' },
   { title: 'Name', key: 'name' },
-  { title: 'SKU', key: 'sku' },
-  { title: 'Category', key: 'category' },
-  { title: 'Price', key: 'price' },
-  { title: 'Stock', key: 'stock' },
-  { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false, align: 'end' },
+  { title: 'Description', key: 'description', width: '300px' },
+  { title: 'Price', key: 'price', width: '120px' },
+  { title: 'Stock', key: 'stock', width: '120px' },
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end', width: '180px' },
 ];
 
-const filteredProducts = computed(() => {
-  if (!categoryFilter.value) return products.value;
-  return products.value.filter(product => 
-    product.category.toLowerCase().includes(categoryFilter.value.toLowerCase())
-  );
+// تقليل طول الوصف
+const truncateDescription = (description) => {
+  if (!description) return '';
+  if (description.length > 100) {
+    return description.substring(0, 100) + '...';
+  }
+  return description;
+};
+
+// Fetch products from API
+const fetchProducts = async () => {
+  try {
+    const { data } = await useFetch('http://127.0.0.1:8000/api/products');
+    if (data.value) {
+      products.value = data.value;
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchProducts();
 });
 
 function getStockColor(stock) {
@@ -169,14 +144,60 @@ function deleteProduct(product) {
   deleteDialog.value = true;
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (selectedProduct.value) {
-    const index = products.value.findIndex(p => p.id === selectedProduct.value.id);
-    if (index !== -1) {
-      products.value.splice(index, 1);
+    try {
+      await $fetch(`http://127.0.0.1:8000/api/products/${selectedProduct.value.id}`, {
+        method: 'DELETE'
+      });
+
+      // Remove from local state
+      const index = products.value.findIndex(p => p.id === selectedProduct.value.id);
+      if (index !== -1) {
+        products.value.splice(index, 1);
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
     }
+
     deleteDialog.value = false;
-    // In a real app, you would make an API call here
   }
 }
 </script>
+
+<style scoped>
+/* تحسين مظهر الجدول */
+.v-data-table {
+  width: 100%;
+}
+
+/* تحسين عرض الأسماء */
+.product-name {
+  font-weight: 500;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* تحسين عرض الأوصاف */
+.product-description {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* تحسين أزرار الإجراءات */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.v-btn {
+  min-width: auto !important;
+}
+</style>
