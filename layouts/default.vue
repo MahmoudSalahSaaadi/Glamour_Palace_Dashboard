@@ -80,7 +80,7 @@ const rail = ref(true);
 
 const productItems = [
   { title: 'All Products', to: '/products', icon: 'mdi-format-list-bulleted' },
-  { title: 'Add New', to: '/products/add', icon: 'mdi-plus-circle' },
+  // { title: 'Add New', to: '/products/add', icon: 'mdi-plus-circle' },
 ];
 
 const categoryItems = [

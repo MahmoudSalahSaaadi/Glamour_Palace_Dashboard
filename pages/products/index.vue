@@ -47,7 +47,8 @@
               <template v-slot:activator="{ props }">
                 <v-btn v-bind="props" icon size="small" variant="text" color="primary"
                   :to="`/products/edit/${item.id}`">
-                  <v-icon>mdi-pencil</v-icon>
+                  <img width="20" height="20" src="/public/edit-pencil-line-01-svgrepo-com.svg" alt="" srcset="">
+
                 </v-btn>
               </template>
             </v-tooltip>
@@ -55,7 +56,7 @@
             <v-tooltip text="View Details">
               <template v-slot:activator="{ props }">
                 <v-btn v-bind="props" icon size="small" variant="text" color="info" :to="`/products/view/${item.id}`">
-                  <v-icon>mdi-eye</v-icon>
+                  <img width="20" height="20" src="/public/visible-eye-svgrepo-com.svg" alt="" srcset="">
                 </v-btn>
               </template>
             </v-tooltip>
@@ -63,7 +64,7 @@
             <v-tooltip text="Delete Product">
               <template v-slot:activator="{ props }">
                 <v-btn v-bind="props" icon size="small" variant="text" color="error" @click="deleteProduct(item)">
-                  <v-icon>mdi-delete</v-icon>
+                  <img width="20" height="20" src="/public/icons8-delete.svg" alt="" srcset="">
                 </v-btn>
               </template>
             </v-tooltip>
